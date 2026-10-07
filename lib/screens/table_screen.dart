@@ -8,7 +8,7 @@ class TableScreen extends StatefulWidget {
   const TableScreen({super.key});
 
   @override
-  State<TableScreen> createState() => TableScreen();
+  State<TableScreen> createState() => _TableScreenState();
 }
 
 class _TableScreenState extends State<TableScreen> {
@@ -43,11 +43,47 @@ class _TableScreenState extends State<TableScreen> {
     ..sort((a, b) => b.magnitude.compareTo(a.magnitude));
     final rows = strongest.take(10).toList()..sort(_compare);
 
-    return Placeholder();
-  }
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        sortColumnIndex: _sortColumn,
+        sortAscending: _ascending,
+        columns: [
+          DataColumn(label: const Text('Mag.'),numeric: true, onSort: _sort),
+          DataColumn(label: const Text('Dubina (km.)'), numeric: true, onSort: _sort),
+          DataColumn(label: const Text('Vrijeme'), onSort: _sort),
+          const DataColumn(label: Text('Mjesto'))
+        ],
+        rows: [
+          for (final quake in rows)
+          DataRow(cells: [
+            DataCell(Text(quake.magnitude.toStringAsFixed(1))),
+            DataCell(Text(quake.depthKm.toStringAsFixed(1))),
+            DataCell(Text(quake.timeLabel)),
+            DataCell(Text(quake.place)),
+          ],
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: AppBar(title: const Text('10 najjačih - uživo'),),
+      body: StreamBuilder<List<Quake>>(
+        stream: _quakes,
+        builder: (context, snapshot) {
+          if(snapshot.hasError) {
+            return const Center(child: Text('Potres nije moguće dohvatiti'));
+          }
+          if(!snapshot.hasData){
+            return const Center(child: CircularProgressIndicator());
+          }
+          return _buildTable(snapshot.data!);
+        },
+      )
+    );
   }
-  }
+}
