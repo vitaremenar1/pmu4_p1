@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
 import '../models/quake.dart';
 import '../services/quake_service.dart';
 
